@@ -1,0 +1,103 @@
+<project name="ZenInitieProjet" default="run">
+	<!-- Sources -->
+	<!-- Files sources repertory -->
+    <property name="src.dir" value="src" />
+	
+	<!-- Files classes of sources.java repertory -->
+    <property name="src.build.dir" value="build/src/" />
+	
+	<!-- Javadoc sources files repertory -->
+	<property name="javadoc.dir" value="javadoc" />
+	
+    <!-- Executable jar file repertory -->
+    <property name="jar.dir" value="jar" />
+	
+	<!-- The manifest used by the executable jar that specify the main class ZenLinitie -->
+    <property name="main-class" value="ZenLinitie" />
+	
+	<!-- The name of the executable jar -->
+    <property name="name.jar" value="ZenLinitie" />
+	
+	<!-- Tests -->
+	<!-- Repertory of test files of java sources -->
+    <property name="test.dir" value="src/test" />
+	
+    <!-- Repertory of test classes of sources.java -->
+    <property name="test.build.dir" value="build/test" />
+	
+
+	<!-- Clean all the class files, the executable jar file and all javadoc files -->
+    <target name="clean">
+        <delete dir="${src.build.dir}" />
+		<delete dir="${test.build.dir}" />
+        <delete dir="${jar.dir}" />
+        <delete dir="$(javadoc.dir}" />
+    </target>
+
+
+    <!-- Write the javadoc of sources and tests files-->
+    <target name="javadoc">
+        <mkdir dir="${javadoc.dir}"/>
+        <javadoc sourcepath="${src.dir}" destdir="${javadoc.dir}" author="true" private="true"/>
+    </target>
+
+
+	<!--  SOURCES -->
+    <!-- Compile the sources java files -->
+    <target name="compile" depends="clean">
+        <mkdir dir="${src.build.dir}" />
+        <javac encoding="UTF8" srcdir="${src.dir}" destdir="${src.build.dir}" includeantruntime="false">
+            <exclude name="test/**"/>
+        </javac>
+    </target>
+	
+
+	<!-- Make an executable file for the Zen L'initie game -->
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}" />
+        <jar destfile="${jar.dir}/${name.jar}.jar" basedir="${src.build.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}" />
+            </manifest>
+        </jar>
+    </target>
+	
+	
+	<!-- Execute the game -->
+    <target name="run" depends="jar">
+        <java jar="${jar.dir}/${name.jar}.jar" fork="true" />
+    </target>
+	
+	
+	<!--  TEST -->
+	<!-- path elements for JUNITl lib and tested sources-->
+	<path id="classpath.test">
+        <pathelement location="lib/junit-4.12.jar" />
+        <pathelement location="lib/hamcrest-core-1.3.jar" />
+        <pathelement location="${src.build.dir}" />
+    </path>
+	
+
+	<!-- compile all tests classes -->
+    <target name="compile-test" depends="compile">
+        <mkdir dir="${test.build.dir}" />
+        <javac srcdir="${test.dir}" destdir="${test.build.dir}" includeantruntime="false">
+            <classpath refid="classpath.test" />
+        </javac>
+    </target>
+	
+	<!--Execute all tests of all classes-->
+	<target name="test" depends="compile-test">
+        <junit printsummary="on" haltonfailure="on" fork="true" includeantruntime="true">
+            <classpath>
+                <pathelement path="${src.build.dir}"/>
+                <pathelement path="${test.build.dir}"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+            <formatter type="brief"/>
+            <batchtest todir="${test.build.dir}">
+                <fileset dir="${src.dir}" includes="test/*.java"/>
+            </batchtest>
+        </junit>
+    </target>
+</project>
